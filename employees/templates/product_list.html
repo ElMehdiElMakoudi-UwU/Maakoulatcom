@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product List</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Product List</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Stock Quantity</th>
+                    <th>Category</th>
+                </tr>
+            </thead>
+            <tbody id="productTableBody">
+                <!-- Product rows will be added here -->
+            </tbody>
+        </table>
+        <a href="{% url 'create-product' %}" class="btn btn-primary">Add New Product</a>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const username = 'admin';  // Replace with your actual username
+            const password = 'admin';  // Replace with your actual password
+            const credentials = btoa(username + ':' + password);  // Encode the username and password in Base64
+        
+            $.ajax({
+                url: 'http://127.0.0.1:8000/api/products/',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Basic ' + credentials,  // Include Basic Authentication header
+                },
+                success: function(products) {
+                    products.forEach(function(product) {
+                        $('#productTableBody').append(`
+                            <tr>
+                                <td>${product.name}</td>
+                                <td>${product.description}</td>
+                                <td>${product.price}</td>
+                                <td>${product.stock_quantity}</td>
+                                <td>${product.category}</td>
+                            </tr>
+                        `);
+                    });
+                },
+                error: function(xhr) {
+                    alert('Error fetching products: ' + xhr.responseText);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

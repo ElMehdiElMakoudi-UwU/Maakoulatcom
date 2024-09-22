@@ -53,3 +53,18 @@ class EmployeeProductViewSet(viewsets.ModelViewSet):
 
         serializer = EmployeeProductSerializer(employee_product)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+
+from django.views.generic import TemplateView
+
+class CreateEmployeeView(TemplateView):
+    template_name = 'create_employee.html'
+
+
+from django.views.generic import TemplateView
+
+class ProductListView(TemplateView):
+    template_name = 'product_list.html'
+
+class CreateProductView(TemplateView):
+    template_name = 'create_product.html'

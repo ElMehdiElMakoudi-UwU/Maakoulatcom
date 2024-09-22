@@ -1,0 +1,84 @@
+<!-- create_employee.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Employee</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Create New Employee</h2>
+        <form id="employeeForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" required>
+            </div>
+            <div class="form-group">
+                <label for="first_name">First Name</label>
+                <input type="text" class="form-control" id="first_name" required>
+            </div>
+            <div class="form-group">
+                <label for="last_name">Last Name</label>
+                <input type="text" class="form-control" id="last_name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="phone_number">Phone Number</label>
+                <input type="text" class="form-control" id="phone_number">
+            </div>
+            <div class="form-group">
+                <label for="job_title">Job Title</label>
+                <input type="text" class="form-control" id="job_title">
+            </div>
+            <div class="form-group">
+                <label for="date_of_birth">Date of Birth</label>
+                <input type="date" class="form-control" id="date_of_birth">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Employee</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $('#employeeForm').on('submit', function(e) {
+            e.preventDefault();
+
+            const employeeData = {
+                username: $('#username').val(),
+                first_name: $('#first_name').val(),
+                last_name: $('#last_name').val(),
+                email: $('#email').val(),
+                phone_number: $('#phone_number').val(),
+                job_title: $('#job_title').val(),
+                date_of_birth: $('#date_of_birth').val(),
+                password: $('#password').val(),
+            };
+
+            $.ajax({
+                url: 'http://127.0.0.1:8000/api/employees/',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(employeeData),
+                success: function(response) {
+                    alert('Employee created successfully!');
+                    // Optionally, redirect or reset the form
+                    $('#employeeForm')[0].reset();
+                },
+                error: function(xhr) {
+                    alert('Error creating employee: ' + xhr.responseText);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

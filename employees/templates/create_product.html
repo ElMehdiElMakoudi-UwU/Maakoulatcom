@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Product</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"></head>
+<body>
+    <div class="container mt-5">
+        <h2>Create New Product</h2>
+        <form id="createProductForm">
+            <div class="form-group mb-3">
+                <label for="name">Product Name</label>
+                <input type="text" class="form-control" id="name" placeholder="Enter product name" required>
+            </div>
+            <div class="form-group mb-3">
+                <label for="description">Description</label>
+                <textarea class="form-control" id="description" rows="3" placeholder="Enter product description" ></textarea>
+            </div>
+            <div class="form-group mb-3">
+                <label for="price">Price</label>
+                <input type="number" step="0.01" class="form-control" id="price" placeholder="Enter product price" required>
+            </div>
+            <div class="form-group mb-3">
+                <label for="stock_quantity">Stock Quantity</label>
+                <input type="number" class="form-control" id="stock_quantity" placeholder="Enter stock quantity" required>
+            </div>
+            <div class="form-group mb-3">
+                <label for="category">Category</label>
+                <input type="text" class="form-control" id="category" placeholder="Enter product category" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Product</button>
+        </form>
+        <div id="message" class="mt-3"></div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const username = 'admin';  // Replace with your actual username
+            const password = 'admin';  // Replace with your actual password
+            const credentials = btoa(username + ':' + password);  // Encode username and password to Base64
+
+            $('#createProductForm').submit(function(event) {
+                event.preventDefault();
+
+                // Gather form data
+                const productData = {
+                    name: $('#name').val(),
+                    description: $('#description').val(),
+                    price: $('#price').val(),
+                    stock_quantity: $('#stock_quantity').val(),
+                    category: $('#category').val()
+                };
+
+                // AJAX POST request with Basic Authentication
+                $.ajax({
+                    url: 'http://127.0.0.1:8000/api/products/',
+                    type: 'POST',
+                    headers: {
+                        'Authorization': 'Basic ' + credentials,  // Basic Authentication header
+                        'Content-Type': 'application/json'         // Ensure JSON content
+                    },
+                    data: JSON.stringify(productData),
+                    success: function(response) {
+                        $('#message').html(`<div class="alert alert-success">Product created successfully!</div>`);
+                        $('#createProductForm')[0].reset();  // Clear the form
+                    },
+                    error: function(xhr) {
+                        $('#message').html(`<div class="alert alert-danger">Error creating product: ${xhr.responseText}</div>`);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
