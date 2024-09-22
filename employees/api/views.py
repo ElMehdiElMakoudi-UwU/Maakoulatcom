@@ -1,38 +1,52 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets
 from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+from ..models import Employee, Product, EmployeeProduct
+from .serializers import EmployeeSerializer, ProductSerializer, EmployeeProductSerializer
 from rest_framework.decorators import action
-from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate
-from ..models import Employee, Product, ListOfProduct
-from .serializers import EmployeeSerializer, ProductSerializer, ListOfProductSerializer
-from rest_framework.authentication import TokenAuthentication
 
-
+# ViewSet for Employee
 class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
-    # authentication_classes = [TokenAuthentication]
-    # permission_classes = [permissions.IsAuthenticated]
-    permission_classes = [permissions.AllowAny]
 
+    # Custom action to get the list of products with quantities for a specific employee
+    @action(detail=True, methods=['get'])
+    def products(self, request, pk=None):
+        employee = self.get_object()
+        employee_products = EmployeeProduct.objects.filter(employee=employee)
+        serializer = EmployeeProductSerializer(employee_products, many=True)
+        return Response(serializer.data)
+
+# ViewSet for Product
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    # authentication_classes = [TokenAuthentication]
-    # permission_classes = [permissions.IsAuthenticated]
-    permission_classes = [permissions.AllowAny]
 
-class ListOfProductsViewSet(viewsets.ModelViewSet):
-    queryset = ListOfProduct.objects.all()
-    serializer_class = ListOfProductSerializer
-    # authentication_classes = [TokenAuthentication]
-    # permission_classes = [permissions.IsAuthenticated]
-    permission_classes = [permissions.AllowAny]
+# ViewSet for EmployeeProduct (assigning products to employees with quantities)
+class EmployeeProductViewSet(viewsets.ModelViewSet):
+    queryset = EmployeeProduct.objects.all()
+    serializer_class = EmployeeProductSerializer
 
-    def perform_create(self, serializer):
-        serializer.save(employee=self.request.user)
+    # Overriding create to handle custom behavior for adding a product to an employee
+    def create(self, request, *args, **kwargs):
+        employee_id = request.data.get('employee_id')
+        product_id = request.data.get('product_id')
+        quantity = request.data.get('quantity')
 
-    def list(self, request):
-        queryset = self.queryset.filter(employee=request.user)
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        employee = get_object_or_404(Employee, id=employee_id)
+        product = get_object_or_404(Product, id=product_id)
+
+        employee_product, created = EmployeeProduct.objects.get_or_create(
+            employee=employee, product=product,
+            defaults={'quantity': quantity}
+        )
+
+        if not created:
+            # If the record already exists, update the quantity
+            employee_product.quantity = quantity
+            employee_product.save()
+
+        serializer = EmployeeProductSerializer(employee_product)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
