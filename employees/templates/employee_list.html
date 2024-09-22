@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Product Management</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom JS for API interaction -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Employee List</h1>
+        <div id="employee-list" class="row mt-4">
+            <!-- Employee cards will be appended here by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Function to fetch and display the employee list
+        $(document).ready(function() {
+            $.ajax({
+                url: 'http://127.0.0.1:8000/api/employees/',
+                type: 'GET',
+                success: function(data) {
+                    let employeeList = '';
+                    data.forEach(function(employee) {
+                        employeeList += `
+                            <div class="col-md-4">
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${employee.first_name} ${employee.last_name}</h5>
+                                        <p class="card-text"><strong>Job Title:</strong> ${employee.job_title || 'N/A'}</p>
+                                        <p class="card-text"><strong>Phone:</strong> ${employee.phone_number || 'N/A'}</p>
+                                        <a href="/employee/${employee.id}/products" class="btn btn-primary">View Products</a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    $('#employee-list').html(employeeList);
+                },
+                error: function() {
+                    alert("Error fetching employees.");
+                }
+            });
+        });
+    </script>
+</body>
+</html>

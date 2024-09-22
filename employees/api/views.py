@@ -5,11 +5,14 @@ from django.shortcuts import get_object_or_404
 from ..models import Employee, Product, EmployeeProduct
 from .serializers import EmployeeSerializer, ProductSerializer, EmployeeProductSerializer
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
 
 # ViewSet for Employee
 class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
+    permission_classes = [AllowAny]  # Allow any user to access this view
+
 
     # Custom action to get the list of products with quantities for a specific employee
     @action(detail=True, methods=['get'])
