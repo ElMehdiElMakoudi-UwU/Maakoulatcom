@@ -34,8 +34,8 @@ class EmployeeProductViewSet(viewsets.ModelViewSet):
 
     # Overriding create to handle custom behavior for adding a product to an employee
     def create(self, request, *args, **kwargs):
-        employee_id = request.data.get('employee_id')
-        product_id = request.data.get('product_id')
+        employee_id = request.data.get('employee')
+        product_id = request.data.get('product')
         quantity = request.data.get('quantity')
 
         employee = get_object_or_404(Employee, id=employee_id)
