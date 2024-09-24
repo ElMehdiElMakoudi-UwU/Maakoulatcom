@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assign Product to Employee</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhbPjIlrK2Qztj92oJPTq4GNiQeCMzZlGhOu4P50d7Cb1KUPLiTOLa1JfEKtkWy" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+    <div class="container my-5">
+        <h1 class="text-center mb-4">Assign Product to Employee</h1>
+
+        <form id="assignProductForm">
+            <div class="mb-3">
+                <label for="employeeSelect" class="form-label">Select Employee</label>
+                <select class="form-select" id="employeeSelect" required>
+                    <option value="" disabled selected>Select an Employee</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="productSelect" class="form-label">Select Product</label>
+                <select class="form-select" id="productSelect" required>
+                    <option value="" disabled selected>Select a Product</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="quantityInput" class="form-label">Quantity</label>
+                <input type="number" class="form-control" id="quantityInput" min="1" required>
+            </div>
+
+            <div id="formAlert" class="alert alert-danger d-none" role="alert"></div>
+
+            <button type="submit" class="btn btn-primary">Assign Product</button>
+        </form>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            const employeeSelect = $('#employeeSelect');
+            const productSelect = $('#productSelect');
+            const formAlert = $('#formAlert');
+
+            // Fetch Employees
+            $.ajax({
+                url: "http://127.0.0.1:8000/api/employees/",
+                method: "GET",
+                headers: {
+                    "Authorization": "Basic " + btoa("admin:admin") // Replace with actual credentials
+                },
+                success: function(data) {
+                    data.forEach(function(employee) {
+                        employeeSelect.append(`<option value="${employee.id}">${employee.first_name} ${employee.last_name}</option>`);
+                    });
+                },
+                error: function(error) {
+                    formAlert.text('Failed to load employees').removeClass('d-none');
+                    console.error("Error fetching employees:", error);
+                }
+            });
+
+            // Fetch Products
+            $.ajax({
+                url: "http://127.0.0.1:8000/api/products/",
+                method: "GET",
+                headers: {
+                    "Authorization": "Basic " + btoa("admin:admin") // Replace with actual credentials
+                },
+                success: function(data) {
+                    data.forEach(function(product) {
+                        productSelect.append(`<option value="${product.id}">${product.name}</option>`);
+                    });
+                },
+                error: function(error) {
+                    formAlert.text('Failed to load products').removeClass('d-none');
+                    console.error("Error fetching products:", error);
+                }
+            });
+
+            // Handle form submission
+            $('#assignProductForm').on('submit', function(event) {
+                event.preventDefault();
+
+                const employeeId = employeeSelect.val();
+                const productId = productSelect.val();
+                const quantity = $('#quantityInput').val();
+
+                if (!employeeId || !productId || !quantity) {
+                    formAlert.text('Please fill in all fields').removeClass('d-none');
+                    return;
+                }
+
+                $.ajax({
+                    url: "http://127.0.0.1:8000/api/employee-products/",
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Basic " + btoa("admin:admin"), // Replace with actual credentials
+                        "Content-Type": "application/json"
+                    },
+                    data: JSON.stringify({
+                        employee: employeeId,
+                        product: productId,
+                        quantity: quantity
+                    }),
+                    success: function(response) {
+                        formAlert.removeClass('alert-danger').addClass('alert-success').text('Product successfully assigned to employee!').removeClass('d-none');
+                    },
+                    error: function(error) {
+                        formAlert.text('Failed to assign product. Try again.').removeClass('d-none');
+                        console.error("Error assigning product:", error);
+                    }
+                });
+            });
+        });
+    </script>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-koUx8rBKIY6FGe7nhon3s5Apt+0xJxLXgo3/5X1b7Zr+ILeYFH2Cnoxrm6KURRFa" crossorigin="anonymous"></script>
+</body>
+</html>
