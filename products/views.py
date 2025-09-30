@@ -393,6 +393,11 @@ def order_delete(request, order_id):
 
     return render(request, 'products/order_confirm_delete.html', {'order': order})
 
+import csv
+from django.shortcuts import render
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+
 @login_required
 def import_products_from_csv(request):
     if request.method == 'POST' and request.FILES.get('csv_file'):
@@ -403,18 +408,23 @@ def import_products_from_csv(request):
             return render(request, 'products/import_products.html')
 
         try:
-            decoded_file = csv_file.read().decode('utf-8').splitlines()
+            # Use 'utf-8-sig' to handle the BOM if it's present
+            decoded_file = csv_file.read().decode('utf-8-sig').splitlines()
             reader = csv.DictReader(decoded_file)
-            # import pdb; pdb.set_trace()
+            
             for row in reader:
                 try:
                     Product.objects.create(
-                        code=row['\ufeffcode'],
+                        # Corrected key from 'code' to 'reference'
+                        code=row['reference'], 
+                        # Corrected key from 'name' to 'name' (already correct)
                         name=row['name'],
-                        name_ar=row.get('name_ar', None),
+                        # Corrected key from 'name_ar' to 'arabic_name'
+                        name_ar=row.get('arabic_name', None), 
                         purchase_price=float(row['purchase_price']),
                         selling_price=float(row['selling_price']),
-                        quantity=int(row['quantity']),
+                        # Provide a default value for 'quantity' since it's missing from the CSV file
+                        quantity=int(row.get('quantity', 0)), 
                         category=row['category'],
                         supplier=row['supplier']
                     )
@@ -426,7 +436,6 @@ def import_products_from_csv(request):
         
         return render(request, 'products/import_products.html')
     
-    # Render the upload page for GET requests
     return render(request, 'products/import_products.html')
 
 @login_required
